@@ -1,74 +1,123 @@
 # 로컬 개발 실행 및 테스트 가이드
 
-## 로컬 개발 실행 방법
+모든 서비스는 Docker Compose로 실행됩니다. 네이티브 실행(gradlew bootRun, pnpm dev)은 사용하지 않습니다.
 
-### 사전 준비
+---
 
-1. 루트 `.env` 파일이 없으면 생성한다.
+## 사전 요구사항
+
+- Docker Desktop 실행 중
+- [mkcert](https://github.com/FiloSottile/mkcert) 설치됨
+
+---
+
+## 초기 설정 (최초 1회)
+
+### 1. 환경변수 파일 생성
 
 ```bash
 cp .env.default .env
 ```
 
-2. 인프라(PostgreSQL + Redis) 컨테이너를 기동한다.
+### 2. 로컬 SSL 인증서 생성
 
 ```bash
-make infra-up
-# 또는: docker compose up -d
+# 로컬 CA를 시스템 인증서 저장소에 등록 (관리자 권한 필요)
+mkcert -install
+
+# certs/ 디렉토리에 localhost 인증서 생성
+make certs
 ```
-
-### 백엔드 실행
-
-```bash
-make dev-backend
-# 또는: cd backend && ./gradlew bootRun
-```
-
-정상 기동 확인: `Started DemoApplication in X seconds` 메시지 출력.
-
-### 프론트엔드 실행
-
-```bash
-make dev-frontend
-# 또는: cd frontend && pnpm dev
-```
-
-`http://localhost:3000` 접속 후 랜딩 페이지가 표시되면 정상.
 
 ---
 
-## 로컬 개발 테스트 방법
-
-### 백엔드 단독 테스트
+## 실행
 
 ```bash
-# Health Check 엔드포인트 응답 확인
-curl http://localhost:8080/api/health
-# 기대 응답: {"status":"ok"}
+make up
 ```
 
-### 프론트엔드 → 백엔드 연결 테스트
+전체 스택(postgres, redis, backend, frontend, nginx)을 빌드하고 실행합니다.
 
-1. 백엔드와 프론트엔드를 모두 실행한 상태에서 `http://localhost:3000` 접속
-2. **"백엔드 Health Check"** 버튼 클릭
-3. `✓ 백엔드 연결 성공: {"status":"ok"}` 메시지가 표시되면 정상
+---
 
-버튼 클릭 시 프론트엔드의 `/api/health` 요청이 `next.config.ts` rewrites를 통해 백엔드 `http://localhost:8080/api/health`로 프록시된다.
+## 테스트
 
-### 작업 종료
+### 접속 확인
+
+`https://localhost` 접속 → SSL 경고 없이 랜딩 페이지 표시
+
+### Health Check
+
+브라우저에서 **Health Check** 버튼 클릭:
+- `https://localhost/api/health` → nginx → `http://backend:8080/api/health`
+- 기대 응답: `{"status":"ok"}`
+
+또는 curl로 직접 테스트:
 
 ```bash
-# 컨테이너 중지 (데이터 유지)
-make infra-down
+curl https://localhost/api/health
+```
 
-# 컨테이너 + 볼륨 전체 삭제 (DB 초기화 필요할 때)
+### 로그 확인
+
+```bash
+make logs
+```
+
+특정 서비스 로그만 보려면:
+
+```bash
+docker compose logs -f backend
+docker compose logs -f frontend
+docker compose logs -f nginx
+```
+
+---
+
+## 종료
+
+```bash
+# 중지 (데이터 유지)
+make down
+
+# 볼륨까지 삭제 (DB 초기화)
 make clean
+```
+
+---
+
+## 트러블슈팅
+
+### 포트 80/443 충돌
+
+다른 서비스가 80 또는 443 포트를 사용 중인 경우:
+
+```bash
+# 점유 중인 프로세스 확인 (Windows)
+netstat -ano | findstr :80
+netstat -ano | findstr :443
+```
+
+### 인증서 오류
+
+`certs/` 디렉토리가 비어 있거나 인증서 파일이 없는 경우:
+
+```bash
+make certs
+```
+
+### DB 초기화 필요
+
+```bash
+make clean
+make up
 ```
 
 ---
 
 ## 주의사항
 
-- `make` 명령어는 루트에 `.env` 파일이 있어야 동작한다.
-- 백엔드 실행 전 반드시 `make infra-up`으로 DB/Redis를 먼저 띄워야 한다.
-- 로컬 PostgreSQL이 5432 포트로 실행 중인 경우 Docker는 5433 포트를 사용한다 (충돌 방지).
+- `make` 명령어는 루트에 `.env` 파일이 있어야 동작합니다.
+- `certs/` 디렉토리는 `.gitignore` 처리되어 각 개발자가 직접 생성해야 합니다.
+- nginx가 API 라우팅 전담 (`/api/*` → backend). Next.js rewrite 없음.
