@@ -2,10 +2,8 @@
   "mcpServers": {
     "context7": {
       "type": "stdio",
-      "command": "cmd",
+      "command": "/usr/local/bin/npx",
       "args": [
-        "/c",
-        "npx",
         "-y",
         "@upstash/context7-mcp",
         "--api-key",
@@ -15,8 +13,8 @@
     },
     "playwright": {
       "type": "stdio",
-      "command": "cmd",
-      "args": ["/c", "npx", "@playwright/mcp@latest"],
+      "command": "/usr/local/bin/npx",
+      "args": ["@playwright/mcp@latest"],
       "env": {}
     }
   }

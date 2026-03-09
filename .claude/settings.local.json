@@ -1,11 +1,6 @@
 {
-  "enabledMcpjsonServers": [
-    "context7",
-    "playwright"
-  ],
+  "enabledMcpjsonServers": ["context7", "playwright"],
   "permissions": {
-    "allow": [
-      "Skill(keybindings-help)"
-    ]
+    "allow": ["Skill(keybindings-help)"]
   }
 }
