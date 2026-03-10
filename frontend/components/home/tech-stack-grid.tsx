@@ -16,7 +16,7 @@ export function TechStackGrid() {
       <h2 className="text-2xl font-bold text-center mb-8">기술 스택</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {stack.map(({ name, desc, icon }) => (
-          <Card key={name} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]">
+          <Card key={name} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] hover:ring-primary/50">
             <CardContent className="pt-6 flex flex-col gap-2">
               <span className="text-2xl">{icon}</span>
               <p className="font-semibold">{name}</p>

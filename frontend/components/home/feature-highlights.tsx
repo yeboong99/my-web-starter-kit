@@ -32,7 +32,7 @@ export function FeatureHighlights() {
       <h2 className="text-2xl font-bold text-center mb-8">주요 특징</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {features.map(({ icon: Icon, title, desc }) => (
-          <Card key={title}>
+          <Card key={title} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] hover:ring-primary/50">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Icon className="h-4 w-4 text-primary" />

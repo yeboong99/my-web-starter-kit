@@ -4,9 +4,11 @@ import { cn } from "@/lib/utils";
 
 const sections = [
   { id: "getting-started", label: "시작하기" },
-  { id: "structure", label: "프로젝트 구조" },
   { id: "architecture", label: "아키텍처" },
+  { id: "structure", label: "프로젝트 구조" },
+  { id: "backend-structure", label: "백엔드 구조" },
   { id: "commands", label: "주요 명령어" },
+  { id: "database", label: "데이터베이스" },
 ];
 
 interface DocSidebarProps {

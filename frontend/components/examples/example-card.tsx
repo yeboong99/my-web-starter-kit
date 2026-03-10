@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface ExampleCardProps {
   title: string;
@@ -11,7 +12,7 @@ interface ExampleCardProps {
 export function ExampleCard({ title, description, category, onClick }: ExampleCardProps) {
   return (
     <Card
-      className="cursor-pointer transition-shadow hover:shadow-md hover:border-primary/50"
+      className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] hover:ring-primary/50"
       onClick={onClick}
     >
       <CardHeader className="pb-2">
@@ -24,6 +25,7 @@ export function ExampleCard({ title, description, category, onClick }: ExampleCa
       </CardHeader>
       <CardContent>
         <CardDescription>{description}</CardDescription>
+        <Button variant="outline" className="w-full mt-4">예제 보기</Button>
       </CardContent>
     </Card>
   );
