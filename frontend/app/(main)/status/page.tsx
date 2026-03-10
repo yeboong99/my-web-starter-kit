@@ -8,7 +8,7 @@ import { ConnectionTest } from "@/components/status/connection-test";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Server, Database, Zap, Globe } from "lucide-react";
-import { fetchHealth } from "@/lib/api";
+import { fetchStatus } from "@/lib/api";
 
 interface HealthData {
   status?: string;
@@ -21,7 +21,7 @@ interface HealthData {
 export default function StatusPage() {
   const { data, isLoading, isError, dataUpdatedAt } = useQuery<HealthData>({
     queryKey: ["health-status"],
-    queryFn: fetchHealth,
+    queryFn: fetchStatus,
     refetchInterval: 5000,
     retry: 1,
   });

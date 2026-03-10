@@ -1,5 +1,6 @@
-package com.example.demo.controller;
+package com.example.demo.global.controller;
 
+import com.example.demo.global.dto.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,7 +23,7 @@ public class StatusController {
     private RedisTemplate<String, String> redisTemplate;
 
     @GetMapping("/status")
-    public Map<String, Object> status() {
+    public ApiResponse<Map<String, Object>> status() {
         Map<String, Object> result = new HashMap<>();
 
         result.put("status", "ok");
@@ -48,6 +49,6 @@ public class StatusController {
         } catch (Exception ignored) {}
         result.put("redis", redisStatus);
 
-        return result;
+        return ApiResponse.ok(result);
     }
 }

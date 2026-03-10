@@ -1,7 +1,7 @@
 include .env
 export
 
-.PHONY: up down logs clean certs
+.PHONY: up up-clean down logs clean certs
 
 # 인증서 생성 (최초 1회, mkcert 설치 필요)
 certs:
@@ -11,6 +11,10 @@ certs:
 # 전체 스택 실행
 up:
 	docker compose up --build -d
+
+# 캐시 없이 전체 재빌드 후 실행 (캐시 손상 시 사용)
+up-clean:
+	docker compose build --no-cache && docker compose up -d
 
 # 전체 스택 중지
 down:
