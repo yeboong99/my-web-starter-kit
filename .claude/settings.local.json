@@ -1,6 +1,8 @@
 {
   "enabledMcpjsonServers": ["context7", "playwright"],
   "permissions": {
-    "allow": ["Skill(keybindings-help)"]
+    "allow": [],
+    "deny": [],
+    "ask": []
   }
 }
