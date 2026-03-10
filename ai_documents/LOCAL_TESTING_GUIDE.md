@@ -34,7 +34,11 @@ make certs
 ## 실행
 
 ```bash
+# 전체 스택 빌드 및 실행
 make up
+
+# 캐시 없이 완전 재빌드 (이미지 캐시 손상 시 사용)
+make up-clean
 ```
 
 전체 스택(postgres, redis, backend, frontend, nginx)을 빌드하고 실행합니다.
@@ -47,16 +51,45 @@ make up
 
 `https://localhost` 접속 → SSL 경고 없이 랜딩 페이지 표시
 
-### Health Check
+| 경로 | 설명 |
+|------|------|
+| `https://localhost/` | 홈 페이지 |
+| `https://localhost/docs` | 문서 페이지 |
+| `https://localhost/examples` | 예제 페이지 |
+| `https://localhost/status` | 서버 상태 페이지 |
 
-브라우저에서 **Health Check** 버튼 클릭:
-- `https://localhost/api/health` → nginx → `http://backend:8080/api/health`
-- 기대 응답: `{"status":"ok"}`
+### API 엔드포인트 테스트
 
-또는 curl로 직접 테스트:
+**Health Check:**
 
 ```bash
-curl https://localhost/api/health
+curl -k https://localhost/api/health
+```
+
+기대 응답:
+
+```json
+{"success":true,"data":{"status":"ok"},"message":"서버가 정상 동작 중입니다"}
+```
+
+**Status Check (DB + Redis 연결 상태):**
+
+```bash
+curl -k https://localhost/api/status
+```
+
+기대 응답:
+
+```json
+{
+  "success": true,
+  "data": {
+    "database": "connected",
+    "redis": "connected",
+    "uptime": "..."
+  },
+  "message": "OK"
+}
 ```
 
 ### 로그 확인
@@ -87,6 +120,19 @@ make clean
 
 ---
 
+## Makefile 명령어 요약
+
+| 명령어 | 설명 |
+|--------|------|
+| `make certs` | mkcert로 로컬 SSL 인증서 생성 |
+| `make up` | 전체 스택 빌드 및 실행 |
+| `make up-clean` | 캐시 없이 전체 재빌드 후 실행 |
+| `make down` | 전체 스택 중지 |
+| `make logs` | 전체 서비스 로그 확인 |
+| `make clean` | 컨테이너 + 볼륨 전체 삭제 |
+
+---
+
 ## 트러블슈팅
 
 ### 포트 80/443 충돌
@@ -94,9 +140,9 @@ make clean
 다른 서비스가 80 또는 443 포트를 사용 중인 경우:
 
 ```bash
-# 점유 중인 프로세스 확인 (Windows)
-netstat -ano | findstr :80
-netstat -ano | findstr :443
+# macOS - 점유 중인 프로세스 확인
+sudo lsof -i :80
+sudo lsof -i :443
 ```
 
 ### 인증서 오류
@@ -105,6 +151,14 @@ netstat -ano | findstr :443
 
 ```bash
 make certs
+```
+
+### 이미지 캐시 문제
+
+빌드 캐시가 손상되어 변경사항이 반영되지 않는 경우:
+
+```bash
+make up-clean
 ```
 
 ### DB 초기화 필요
@@ -121,3 +175,4 @@ make up
 - `make` 명령어는 루트에 `.env` 파일이 있어야 동작합니다.
 - `certs/` 디렉토리는 `.gitignore` 처리되어 각 개발자가 직접 생성해야 합니다.
 - nginx가 API 라우팅 전담 (`/api/*` → backend). Next.js rewrite 없음.
+- curl 사용 시 `-k` 플래그로 로컬 자체 서명 인증서 경고를 무시합니다.

@@ -5,18 +5,21 @@ Spring Boot + Next.js 기반 웹 애플리케이션 스타터킷입니다.
 
 ## 기술 스택
 
-| 분류            | 기술                        |
-| --------------- | --------------------------- |
-| Language        | Java 17                     |
-| Framework       | Spring Boot 4.0.3           |
-| ORM             | Spring Data JPA + Hibernate |
-| Database        | PostgreSQL 17               |
-| Cache / Session | Redis 7                     |
-| Security        | Spring Security 7           |
-| Build           | Gradle                      |
-| Frontend        | Next.js 16 + Tailwind CSS   |
-| UI Components   | shadcn/ui                   |
-| 인프라          | Docker Compose + nginx      |
+| 분류            | 기술                                      |
+| --------------- | ----------------------------------------- |
+| Language        | Java 17                                   |
+| Framework       | Spring Boot 4.0.3                         |
+| ORM             | Spring Data JPA + Hibernate               |
+| Database        | PostgreSQL 17                             |
+| Cache / Session | Redis 7                                   |
+| Security        | Spring Security 7                         |
+| Build           | Gradle                                    |
+| Frontend        | Next.js 16 (App Router) + Tailwind CSS v4 |
+| UI Components   | shadcn/ui                                 |
+| 상태관리        | React Query v5                            |
+| 언어            | React 19, TypeScript 5                    |
+| 패키지 매니저   | pnpm                                      |
+| 인프라          | Docker Compose + nginx                    |
 
 ## 프로젝트 구조
 
@@ -25,25 +28,52 @@ my-web-starter-kit/
 ├── backend/                        # Spring Boot 애플리케이션
 │   ├── src/main/
 │   │   ├── java/com/example/demo/
-│   │   │   ├── config/
-│   │   │   │   └── SecurityConfig.java   # CORS + Security 설정
-│   │   │   └── controller/
-│   │   │       └── HealthController.java # GET /api/health
+│   │   │   └── global/
+│   │   │       ├── config/
+│   │   │       │   └── SecurityConfig.java       # CORS + Security 설정
+│   │   │       ├── controller/
+│   │   │       │   ├── HealthController.java     # GET /api/health
+│   │   │       │   └── StatusController.java     # GET /api/status
+│   │   │       ├── dto/
+│   │   │       │   └── ApiResponse.java          # 공통 응답 형식 (Record)
+│   │   │       └── exception/
+│   │   │           ├── code/
+│   │   │           │   ├── ErrorCode.java        # 에러 코드 인터페이스
+│   │   │           │   └── CommonErrorCode.java  # 공통 에러 코드 enum
+│   │   │           ├── custom/
+│   │   │           │   └── BusinessException.java
+│   │   │           └── handler/
+│   │   │               └── GlobalExceptionHandler.java
 │   │   └── resources/
 │   │       └── application.yml
-│   ├── secrets/                    # 파일 기반 시크릿 보관 (.gitignore 처리)
 │   └── Dockerfile
 ├── frontend/                       # Next.js 애플리케이션
 │   ├── app/
-│   │   └── page.tsx                # 스타터 랜딩 페이지
-│   ├── components/ui/              # shadcn/ui 컴포넌트
-│   ├── next.config.ts              # standalone 설정
+│   │   └── (main)/                 # Route Group
+│   │       ├── page.tsx            # 홈 (/)
+│   │       ├── docs/page.tsx       # 문서 (/docs)
+│   │       ├── examples/page.tsx   # 예제 (/examples)
+│   │       └── status/page.tsx     # 상태 (/status)
+│   ├── components/
+│   │   ├── home/                   # 홈 페이지 컴포넌트
+│   │   ├── layout/                 # 레이아웃 컴포넌트
+│   │   ├── status/                 # 상태 페이지 컴포넌트
+│   │   ├── docs/                   # 문서 페이지 컴포넌트
+│   │   ├── examples/               # 예제 페이지 컴포넌트
+│   │   └── ui/                     # shadcn/ui 컴포넌트 (~30개)
+│   ├── lib/
+│   │   ├── api.ts                  # fetchHealth, fetchStatus
+│   │   ├── query-provider.tsx      # React Query 설정
+│   │   └── utils.ts
+│   ├── next.config.ts              # standalone 출력 모드
 │   └── Dockerfile
 ├── nginx/
-│   └── default.conf                # nginx 리버스 프록시 설정
+│   └── default.conf                # SSL + 리버스 프록시 설정
+├── ai_documents/                   # AI 가이드 문서
 ├── certs/                          # mkcert 로컬 인증서 (.gitignore 처리)
-├── docker-compose.yml              # 전체 스택 (모든 서비스)
+├── docker-compose.yml              # 전체 스택 (5개 서비스)
 ├── Makefile                        # 개발 명령어
+├── CLAUDE.md                       # Claude Code 가이드
 ├── .env                            # 환경변수 실제 값 (.gitignore 처리)
 └── .env.default                    # 환경변수 템플릿 (Git 포함)
 ```
@@ -84,6 +114,7 @@ make up
 |---|---|
 | `make certs` | mkcert로 로컬 SSL 인증서 생성 |
 | `make up` | 전체 스택 빌드 및 실행 |
+| `make up-clean` | 볼륨 삭제 후 전체 스택 빌드 및 실행 |
 | `make down` | 전체 스택 중지 |
 | `make logs` | 전체 서비스 로그 확인 |
 | `make clean` | 컨테이너 + 볼륨 전체 삭제 |
@@ -108,7 +139,12 @@ make up
 
 ---
 
-## API 라우팅
+## API 엔드포인트
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| `GET` | `/api/health` | 서버 상태 확인 |
+| `GET` | `/api/status` | DB, Redis 연결 상태 + 업타임 |
 
 모든 백엔드 엔드포인트는 `/api/` prefix를 사용합니다.
 nginx가 `/api/*` 요청을 backend로 프록시합니다.
@@ -116,6 +152,17 @@ nginx가 `/api/*` 요청을 backend로 프록시합니다.
 ```typescript
 // 프론트엔드 코드에서
 fetch("/api/health")  // → nginx → http://backend:8080/api/health
+fetch("/api/status")  // → nginx → http://backend:8080/api/status
+```
+
+공통 응답 형식 (`ApiResponse<T>`):
+
+```json
+{
+  "success": true,
+  "data": { ... },
+  "message": "OK"
+}
 ```
 
 ---
@@ -157,9 +204,3 @@ make clean
 make up
 ```
 
----
-
-## 시크릿 파일 관리
-
-파일 기반 시크릿(API 키 등)은 `backend/secrets/` 디렉토리에 보관합니다.
-이 디렉토리는 `.gitignore`에 등록되어 Git에 포함되지 않습니다.
