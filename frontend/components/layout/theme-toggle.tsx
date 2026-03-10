@@ -2,20 +2,42 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
+
+  const toggle = () => setTheme(isDark ? "light" : "dark");
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    <button
+      onClick={toggle}
       aria-label="테마 전환"
+      className={`relative inline-flex h-7 w-[52px] items-center rounded-full transition-colors duration-300 focus:outline-none ${
+        isDark ? "bg-gray-800" : "bg-gray-200"
+      }`}
     >
-      <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-    </Button>
+      <span
+        style={{
+          transform: isDark ? "translateX(26px)" : "translateX(2px)",
+          backgroundColor: isDark ? "#000" : "#fff",
+          transition: "transform 300ms, background-color 300ms",
+        }}
+        className="inline-flex h-6 w-6 items-center justify-center rounded-full"
+      >
+        {isDark ? (
+          <Moon className="h-3.5 w-3.5 text-white" />
+        ) : (
+          <Sun className="h-3.5 w-3.5 text-black" />
+        )}
+      </span>
+    </button>
   );
 }
