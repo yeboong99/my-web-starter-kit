@@ -26,6 +26,7 @@ backend → PostgreSQL:5432, Redis:6379
 ## 백엔드 구조
 
 패키지: `com.example.demo`
+
 - `global/config/` - SecurityConfig (CORS + Security, 현재 permitAll)
 - `global/controller/` - HealthController (`/api/health`), StatusController (`/api/status`)
 - `global/dto/` - ApiResponse<T> (Record 타입, 공통 응답 형식)
@@ -57,3 +58,9 @@ backend → PostgreSQL:5432, Redis:6379
 ## 로컬 개발 실행 및 테스트
 
 로컬 개발 환경 실행 방법과 테스트 방법은 `/ai_documents/LOCAL_TESTING_GUIDE.md`를 확인하세요.
+
+---
+
+## 이 프로젝트는 현재 스타터킷 상태입니다.
+
+- 이 스타터킷을 이용한 첫 claude /init 을 실행할 경우 기획부터 하면 된다고 안내하세요.
